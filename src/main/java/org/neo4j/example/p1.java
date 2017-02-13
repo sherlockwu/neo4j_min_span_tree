@@ -22,13 +22,12 @@ public class p1
     public GraphDatabaseService graphDB;    
 
 	public enum RelationshipTypes implements RelationshipType {
-        IS_FRIEND_OF,
-        HAS_SEEN;
+    	CONNECTED;
     }
 
     public enum Labels implements Label {
-            node,
-            MOVIE;
+    	NODE,
+    	REACHED;
     }
 
 
@@ -40,20 +39,46 @@ public class p1
             @Name(value = "delimiter", defaultValue = ",") String delimiter) {
 		
 		System.out.println("T01, here in the new procedure!");
-        
 
+		/*
         // Begin some search
             // Find all users
-            ResourceIterator<Node> nodes = graphDB.findNodes( Labels.node );
+            ResourceIterator<Node> nodes = graphDB.findNodes( Labels.Node );
             System.out.println( "Nodes:" );
             while( nodes.hasNext() )
             {
                 Node node = nodes.next();
                 System.out.println( "\t" + node.getProperty( "id" ) );
             }
+		*/
 
+		// Initialize
+		// node 0 -> reached
+			Node node_next = graphDB.findNode(Labels.Node, "id", 0);
+			System.out.println("get the node:"+ node_next);
+			//node_next.setProperty( "reached", 1 );
+			node_next.addLabel(REACHED);
+		// EdgeFrontier 0->outedge
+			//TODO load into mem/ add a property
+			// just give one more property to nodes?
+			List edge_frontier = new ArrayList();
+			for (Relationship line_from_node_next: node_next.getRelationships( CONNECTED )) {
+				edge_frontier.add(line_from_node_next);
+			}
 
+		// While loop  edgelist not empty
+		while (!empty(edge_frontier)) {
+			// find a smallest relationship
+			node_next = get_smallest(edge_frontier);
+			
+			// add node and update edges(delete, add)
+			node_next.addLabel(REACHED);
+				// delete edges 
+			update_edge_frontier(edge_frontier, node_next);
+				// add edges (to not reached ones)
 
+		}
+		// Printout according to extended property of the relationship
 
 		// return String.join(delimiter, strings);
     	return;
